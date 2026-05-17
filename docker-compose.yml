@@ -1,0 +1,14 @@
+services:
+  dinners:
+    build: .
+    container_name: dinners
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-6}
+      TODOIST_API_TOKEN: ${TODOIST_API_TOKEN:-}
+      TODOIST_PROJECT_NAME: ${TODOIST_PROJECT_NAME:-Groceries}
+    volumes:
+      - ./data:/data

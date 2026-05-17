@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.henry.dinners.weekly</string>
+
+    <!-- Run the cron task inside the running docker container so the same Node env,
+         deps, and /data volume are used as the family-facing app. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>-lc</string>
+        <string>/usr/local/bin/docker exec dinners node backend/src/cron-runner.js</string>
+    </array>
+
+    <!-- Every Monday at 08:00 local time. If the Mac was asleep at the trigger,
+         launchd will fire it once on wake (RunAtLoad=false keeps this from
+         firing every login). -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key>
+        <integer>1</integer>
+        <key>Hour</key>
+        <integer>8</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/henry/SW/dinners/logs/cron.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/henry/SW/dinners/logs/cron.err.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/henry/SW/dinners</string>
+</dict>
+</plist>

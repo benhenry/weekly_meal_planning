@@ -1,0 +1,28 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build output
+dist/
+frontend/dist/
+
+# Cron logs
+logs/*
+!logs/.gitkeep
+
+# macOS
+.DS_Store
+
+# Local Claude harness state
+.claude/
+
+# Legacy / stray artifacts predating the move to `data/`
+/pantry.json
+/history.json
+/preferences.json
+/files.zip
