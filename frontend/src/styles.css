@@ -36,6 +36,7 @@ textarea { resize: vertical; min-height: 60px; }
 .badge { background: var(--accent-soft); color: var(--accent); font-size: 11px; padding: 2px 8px; border-radius: 12px; }
 .meal .actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .feedback-loved { color: var(--good); font-weight: 600; }
+.feedback-ok { color: var(--muted); font-weight: 600; }
 .feedback-bad { color: var(--accent); font-weight: 600; }
 .shopping { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
 .shopping h3 { margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }

@@ -50,7 +50,8 @@ const RECIPE_RULES = `Hard constraints:
 - Each side: 2-6 ingredients with quantities, 2-5 numbered steps
 - Sides should be vegetable-forward: roasted veggies, simple salads, sautéed greens, slaw, cucumber salad, etc. Vary across the week — don't repeat the same vegetable or technique two days in a row.
 - Tuesday tacos: side can be the standard taco bar (slaw, pico, guac) OR a separate veggie side — your call
-- SHOPPING LIST MUST INCLUDE INGREDIENTS FROM BOTH mains AND sides. Dedupe across days; note which days each ingredient is needed.`;
+- SHOPPING LIST MUST INCLUDE INGREDIENTS FROM BOTH mains AND sides. Dedupe across days; note which days each ingredient is needed.
+- Past feedback notes from the family are LOAD-BEARING context. Read them carefully. A note like "kid loved the broccoli" → pick more cruciferous sides. A note like "main was bland" → pick mains with bolder flavor profiles. A note like "took 70 min not 40" → pick a lower-difficulty main in that slot. Do not ignore them.`;
 
 function buildSystemPrompt() {
   return `You are a weekly meal planner for a family of 3 (two adults + a picky 8-year-old).
@@ -59,11 +60,26 @@ ${RECIPE_RULES}
 ${PLAN_SCHEMA}`;
 }
 
-function buildUserPrompt({ pantry, history, preferences, weekOf, instruction }) {
-  const recent = (history.weeks || []).slice(-3).map((w) => ({
+function normalizeFeedback(f) {
+  if (!f) return null;
+  if (typeof f === "string") return { rating: f, notes: "" };
+  return { rating: f.rating || null, notes: f.notes || "" };
+}
+
+function recentWithFeedback(history) {
+  return (history.weeks || []).slice(-3).map((w) => ({
     weekOf: w.weekOf,
-    meals: Object.values(w.meals || {}).map((m) => m.name),
+    meals: Object.entries(w.meals || {}).map(([day, m]) => {
+      const fb = normalizeFeedback(w.feedback?.[day]);
+      const entry = { day, name: m.name, side: m.side?.name || null };
+      if (fb && (fb.rating || fb.notes)) entry.feedback = fb;
+      return entry;
+    }),
   }));
+}
+
+function buildUserPrompt({ pantry, history, preferences, weekOf, instruction }) {
+  const recent = recentWithFeedback(history);
   return `Today's plan target weekOf: ${weekOf}
 
 Pantry items currently on hand:
@@ -74,7 +90,7 @@ Preferences:
 - disliked: ${JSON.stringify(preferences.disliked)}
 - notes: ${preferences.notes || "(none)"}
 
-Recent meals (avoid repeating):
+Recent meals and family feedback (avoid repeating, but USE THE NOTES to inform new picks — if a note says "kid loved the broccoli but main was bland", weight similar sides up and bump up the seasoning on similar mains):
 ${JSON.stringify(recent, null, 2)}
 
 Additional instruction from user:
@@ -105,6 +121,8 @@ export async function generatePlan({ pantry, history, preferences, weekOf, instr
 export async function swapMeal({ pantry, history, preferences, weekOf, day, currentPlan, reason }) {
   const anthropic = getClient();
   const current = currentPlan.meals?.[day];
+  const priorFeedback = normalizeFeedback(currentPlan.feedback?.[day]);
+  const recent = recentWithFeedback(history);
   const sys = `You replace a single day's dinner in an existing weekly plan. Return ONLY a JSON object with this shape:
 {
   "name": "...", "cuisine": "...", "timeMin": 35, "pantryUsed": ["..."], "kidFriendly": true,
@@ -117,19 +135,24 @@ Rules:
 - Always include both "recipe" and "side". Side must be vegetable-forward.
 - Avoid disliked meals, avoid the current pick, prefer pantry items, Tuesday must still be tacos.
 - Don't repeat a vegetable already used elsewhere in the week (you'll see other meals in the user message).`;
-  const user = `Day to swap: ${day} (current pick: ${current?.name || "(none)"})
-Reason: ${reason || "user requested swap"}
+  const user = `Day to swap: ${day} (current pick: ${current?.name || "(none)"}${current?.side?.name ? ` + side: ${current.side.name}` : ""})
+Reason from user: ${reason || "(no reason given; just want a different pick)"}
+${priorFeedback ? `Existing feedback recorded for this meal: ${JSON.stringify(priorFeedback)}` : ""}
 
 Pantry: ${JSON.stringify(pantry.items)}
 Liked: ${JSON.stringify(preferences.liked)}
 Disliked: ${JSON.stringify(preferences.disliked)}
-Notes: ${preferences.notes}
-Other meals this week (do not duplicate): ${JSON.stringify(
+Family notes: ${preferences.notes}
+
+Other meals this week (do not duplicate, and don't pick a side using the same hero vegetable):
+${JSON.stringify(
     Object.entries(currentPlan.meals || {})
       .filter(([d]) => d !== day)
-      .map(([, m]) => m.name)
+      .map(([d, m]) => ({ day: d, name: m.name, side: m.side?.name }))
   )}
-Recent meals: ${JSON.stringify((history.weeks || []).slice(-3).map((w) => Object.values(w.meals || {}).map((m) => m.name)))}`;
+
+Recent meals + feedback (learn from notes):
+${JSON.stringify(recent)}`;
   const res = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 1500,

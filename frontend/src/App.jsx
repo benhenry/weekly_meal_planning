@@ -5,6 +5,8 @@ import ShoppingList from "./components/ShoppingList.jsx";
 import PantryEditor from "./components/PantryEditor.jsx";
 import PreferencesEditor from "./components/PreferencesEditor.jsx";
 import RecipeEditor from "./components/RecipeEditor.jsx";
+import FeedbackModal from "./components/FeedbackModal.jsx";
+import SwapModal from "./components/SwapModal.jsx";
 
 const TABS = [
   { id: "week", label: "This Week" },
@@ -20,6 +22,8 @@ export default function App() {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [feedbackFor, setFeedbackFor] = useState(null);
+  const [swapFor, setSwapFor] = useState(null);
 
   const flash = (msg) => {
     setToast(msg);
@@ -59,12 +63,13 @@ export default function App() {
   const handleSwap = (day, reason) => wrap(`Swapped ${day}`, async () => {
     const { plan } = await api.swap(day, reason);
     setState((s) => ({ ...s, currentPlan: plan }));
+    setSwapFor(null);
   });
 
-  const handleFeedback = (day, feedback) => wrap("Feedback saved", async () => {
-    const { plan } = await api.feedback(day, feedback);
+  const handleFeedback = (day, payload) => wrap("Feedback saved", async () => {
+    const { plan } = await api.feedback(day, payload);
     setState((s) => ({ ...s, currentPlan: plan }));
-    await refresh();
+    setFeedbackFor(null);
   });
 
   const handleSaveRecipe = (day, meal) => wrap("Recipe saved", async () => {
@@ -127,8 +132,8 @@ export default function App() {
           <WeekView
             plan={state.currentPlan}
             busy={busy}
-            onSwap={handleSwap}
-            onFeedback={handleFeedback}
+            onSwap={(day) => setSwapFor(day)}
+            onFeedback={(day) => setFeedbackFor(day)}
             onEditRecipe={(day) => setEditing(day)}
             onGenerate={handleGenerate}
           />
@@ -146,6 +151,25 @@ export default function App() {
           meal={state.currentPlan.meals[editing]}
           onClose={() => setEditing(null)}
           onSave={(meal) => handleSaveRecipe(editing, meal)}
+        />
+      )}
+
+      {feedbackFor && state.currentPlan?.meals?.[feedbackFor] && (
+        <FeedbackModal
+          day={feedbackFor}
+          meal={state.currentPlan.meals[feedbackFor]}
+          existing={state.currentPlan.feedback?.[feedbackFor]}
+          onClose={() => setFeedbackFor(null)}
+          onSave={(payload) => handleFeedback(feedbackFor, payload)}
+        />
+      )}
+
+      {swapFor && state.currentPlan?.meals?.[swapFor] && (
+        <SwapModal
+          day={swapFor}
+          meal={state.currentPlan.meals[swapFor]}
+          onClose={() => setSwapFor(null)}
+          onSwap={(reason) => handleSwap(swapFor, reason)}
         />
       )}
 

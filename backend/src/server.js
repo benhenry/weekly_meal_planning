@@ -59,22 +59,32 @@ app.post("/api/plan/swap", async (req, res, next) => {
 
 app.post("/api/plan/feedback", async (req, res, next) => {
   try {
-    const { day, feedback } = req.body || {};
-    if (!day || !feedback) return res.status(400).json({ error: "day and feedback required" });
+    const { day, rating, notes } = req.body || {};
+    if (!day) return res.status(400).json({ error: "day required" });
+    if (rating == null && (notes == null || notes === "")) {
+      return res.status(400).json({ error: "rating or notes required" });
+    }
     const history = await storage.getHistory();
     const weeks = history.weeks || [];
     if (!weeks.length) return res.status(400).json({ error: "no current plan" });
     const current = weeks[weeks.length - 1];
     current.feedback = current.feedback || {};
-    current.feedback[day] = feedback;
+
+    // Merge with any prior feedback for this day (so adding notes later doesn't erase rating).
+    const prior = current.feedback[day];
+    const priorObj = typeof prior === "string" ? { rating: prior, notes: "" } : (prior || { rating: null, notes: "" });
+    current.feedback[day] = {
+      rating: rating !== undefined ? rating : priorObj.rating,
+      notes: notes !== undefined ? notes : priorObj.notes,
+    };
 
     const mealName = current.meals?.[day]?.name;
-    if (mealName) {
+    if (mealName && rating) {
       const prefs = await storage.getPreferences();
       const liked = new Set(prefs.liked || []);
       const disliked = new Set(prefs.disliked || []);
-      if (feedback === "loved") { liked.add(mealName); disliked.delete(mealName); }
-      else if (feedback === "too-complicated" || feedback === "disliked") {
+      if (rating === "loved") { liked.add(mealName); disliked.delete(mealName); }
+      else if (rating === "too-complicated" || rating === "disliked") {
         disliked.add(mealName); liked.delete(mealName);
       }
       await storage.setPreferences({ ...prefs, liked: [...liked], disliked: [...disliked] });
