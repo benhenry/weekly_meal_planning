@@ -18,11 +18,11 @@
             "ingredients": [
               {
                 "item": "Bone-in chicken thighs",
-                "quantity": "3 pieces (about 1.5 lb)"
+                "quantity": "6 pieces (about 2 lb)"
               },
               {
                 "item": "Moroccan spice blend",
-                "quantity": "2 tbsp"
+                "quantity": "4 tbsp"
               },
               {
                 "item": "Olive oil",
@@ -30,11 +30,11 @@
               },
               {
                 "item": "Canned tomatoes",
-                "quantity": "1 can (14 oz)"
+                "quantity": "1 can (28 oz)"
               },
               {
                 "item": "Golden raisins",
-                "quantity": "1/4 cup"
+                "quantity": "1/2 cup"
               },
               {
                 "item": "Cornmeal",
@@ -46,19 +46,30 @@
               },
               {
                 "item": "Garlic",
-                "quantity": "3 cloves, minced"
+                "quantity": "5 cloves, minced"
+              },
+              {
+                "item": "Yellow Onion",
+                "quantity": "1"
               }
             ],
             "steps": [
-              "Preheat oven to 400°F. Pat chicken thighs dry and rub all over with Moroccan spice and 1 tbsp olive oil. Season with salt.",
+              "Preheat oven to 400\u00b0F. Pat chicken thighs dry and rub all over with Moroccan spice and 1 tbsp olive oil. Season with salt.",
               "Heat 1 tbsp olive oil in an oven-safe skillet over medium-high. Sear chicken skin-side down 5 minutes until golden, flip and sear 2 more minutes.",
-              "Add garlic, canned tomatoes, and golden raisins to the skillet. Nestle chicken into sauce and transfer skillet to oven. Roast 35–40 minutes until chicken is cooked through (165°F).",
+              "Add garlic, canned tomatoes, and golden raisins to the skillet. Nestle chicken into sauce and transfer skillet to oven. Roast 35\u201340 minutes until chicken is cooked through (165\u00b0F).",
               "While chicken roasts, bring 3 cups salted water to boil. Whisk in cornmeal in a slow stream, reduce heat to low.",
-              "Stir cornmeal constantly 5–7 minutes until thick and pulling from sides. Stir in butter. Season with salt.",
+              "Stir cornmeal constantly 5\u20137 minutes until thick and pulling from sides. Stir in butter. Season with salt.",
               "Spread cornmeal onto a parchment-lined baking sheet to about 1/2-inch thick. Let rest 5 minutes, then slice into wedges.",
-              "Serve chicken and sauce over or alongside cornmeal flatbread wedges. Spoon extra pan sauce over everything."
+              "Serve chicken and sauce over or alongside cornmeal flatbread wedges. Spoon extra pan sauce over everything.",
+              "Add Onion and other veg to pan to pre-cook (brown the onion) before adding to roasting pan"
             ],
             "notes": "Kid tip: Serve the mild, sweet tomato-raisin sauce separately as a dipping sauce. Cornmeal wedges are finger-food friendly."
+          },
+          "side": {
+            "name": "",
+            "timeMin": 15,
+            "ingredients": [],
+            "steps": []
           }
         },
         "Mon": {
@@ -116,10 +127,10 @@
             ],
             "steps": [
               "Bring a small pot of water to a boil. Gently lower eggs in and cook 7 minutes, then transfer to an ice bath. Peel and halve when cooled.",
-              "Cook soba noodles according to package directions (usually 4–5 min). Drain and rinse under cold water to prevent sticking; set aside.",
+              "Cook soba noodles according to package directions (usually 4\u20135 min). Drain and rinse under cold water to prevent sticking; set aside.",
               "In a medium saucepan, warm the soba/udon broth over medium heat. Add soy sauce, ginger, and garlic; simmer 5 minutes.",
-              "Meanwhile, heat neutral oil in a skillet over medium-high heat. Sauté mushrooms 5–6 minutes until golden and slightly crispy. Season lightly with salt.",
-              "Divide noodles among three bowls. Ladle hot broth over noodles. Top with sautéed mushrooms, a halved soft-boiled egg, a drizzle of sesame oil, and green onions.",
+              "Meanwhile, heat neutral oil in a skillet over medium-high heat. Saut\u00e9 mushrooms 5\u20136 minutes until golden and slightly crispy. Season lightly with salt.",
+              "Divide noodles among three bowls. Ladle hot broth over noodles. Top with saut\u00e9ed mushrooms, a halved soft-boiled egg, a drizzle of sesame oil, and green onions.",
               "For the picky eater, serve broth on the side for dipping if preferred."
             ],
             "notes": "Keep toppings modular so the 8-year-old can customize their bowl. Candy cap mushrooms can be rehydrated and added alongside regular mushrooms for deeper flavor."
@@ -146,7 +157,7 @@
               }
             ],
             "steps": [
-              "Steam broccoli florets over boiling water for 4–5 minutes until bright green and just tender.",
+              "Steam broccoli florets over boiling water for 4\u20135 minutes until bright green and just tender.",
               "Whisk together sesame oil and soy sauce; drizzle over broccoli.",
               "Sprinkle with chia seeds if desired and serve immediately alongside the noodle bowls."
             ]
@@ -199,13 +210,13 @@
             "steps": [
               "Toast dried chilis in a dry skillet 30 seconds per side until fragrant. Place in a bowl, cover with boiling water, and soak 10 minutes.",
               "Drain chilis and blend with canned tomatoes, garlic, and 1/4 cup soaking liquid until smooth. Season with salt.",
-              "Brown ground beef in the skillet over medium-high, breaking up with a spoon, about 5–6 minutes. Drain excess fat.",
+              "Brown ground beef in the skillet over medium-high, breaking up with a spoon, about 5\u20136 minutes. Drain excess fat.",
               "Pour chili sauce over beef. Simmer 5 minutes until sauce thickens and coats meat. Adjust salt.",
               "Warm tortillas directly on a gas burner 30 seconds per side, or in a dry skillet.",
               "Set up a taco bar with cheese, sour cream, and lime wedges. Let the family build their own tacos.",
               "Kid option: Serve beef without chili sauce on a separate plain tortilla with just cheese if needed."
             ],
-            "notes": "Ancho chilis are mild and slightly sweet — great gateway for kids. Guajillo adds more heat; use ancho for kid-friendliest result."
+            "notes": "Ancho chilis are mild and slightly sweet \u2014 great gateway for kids. Guajillo adds more heat; use ancho for kid-friendliest result."
           }
         },
         "Wed": {
@@ -258,17 +269,17 @@
               "Heat olive oil in a medium saucepan over medium heat. Add onion and cook 5 minutes until softened.",
               "Add garlic and Moroccan spice. Cook 1 minute, stirring, until fragrant.",
               "Add rinsed red lentils, canned tomatoes, and chicken stock. Stir to combine.",
-              "Bring to a boil, then reduce heat to medium-low. Simmer uncovered 20–25 minutes until lentils are completely soft and beginning to fall apart.",
-              "Use an immersion blender to partially blend the soup — leave some texture. Or blend half and stir back in.",
+              "Bring to a boil, then reduce heat to medium-low. Simmer uncovered 20\u201325 minutes until lentils are completely soft and beginning to fall apart.",
+              "Use an immersion blender to partially blend the soup \u2014 leave some texture. Or blend half and stir back in.",
               "Add lemon juice and season generously with salt and pepper. Add a splash of water if too thick.",
               "Ladle into bowls and serve with crusty bread or toast for dipping."
             ],
-            "notes": "This soup freezes beautifully — make a double batch if time allows. Kid-friendly when blended smooth; serve bread for dipping fun."
+            "notes": "This soup freezes beautifully \u2014 make a double batch if time allows. Kid-friendly when blended smooth; serve bread for dipping fun."
           }
         },
         "Thu": {
           "name": "Leftovers",
-          "cuisine": "—",
+          "cuisine": "\u2014",
           "timeMin": 15,
           "pantryUsed": [],
           "kidFriendly": true,
@@ -277,7 +288,7 @@
             "ingredients": [],
             "steps": [
               "Reheat Wednesday's red lentil soup on the stovetop over medium heat, adding a splash of water or broth to loosen if needed.",
-              "Alternatively, reheat Sunday's Moroccan chicken thighs in a 350°F oven for 15 minutes, covered with foil.",
+              "Alternatively, reheat Sunday's Moroccan chicken thighs in a 350\u00b0F oven for 15 minutes, covered with foil.",
               "Warm leftover taco meat in a skillet with a splash of water to refresh the sauce."
             ],
             "notes": "Remix idea: Stuff leftover taco meat into a quesadilla with remaining cheese for a quick Thursday lunch or dinner upgrade."
@@ -285,7 +296,7 @@
         },
         "Fri": {
           "name": "Leftovers",
-          "cuisine": "—",
+          "cuisine": "\u2014",
           "timeMin": 15,
           "pantryUsed": [],
           "kidFriendly": true,
@@ -293,7 +304,7 @@
             "servings": 3,
             "ingredients": [],
             "steps": [
-              "Reheat Sunday or Wednesday remix — lentil soup reheated with a fried egg on top makes a quick hearty Friday bowl."
+              "Reheat Sunday or Wednesday remix \u2014 lentil soup reheated with a fried egg on top makes a quick hearty Friday bowl."
             ],
             "notes": "Remix idea: Spoon leftover red lentil soup into a bowl, top with a soft-fried egg and a drizzle of olive oil for a protein-boosted Friday dinner."
           }
