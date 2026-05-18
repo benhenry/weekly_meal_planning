@@ -7,8 +7,8 @@ Weekly meal planner that asks Claude to design a full week of dinners — main +
 - **Generates a 6-day plan** (Sun–Thu mains, Fri leftovers) — each day has a main + a vegetable side that runs in parallel.
 - **Respects family constraints** — time caps per night, picky kid, weekly themes (Tuesday tacos, Wednesday international rotation, Thursday noodles).
 - **Pantry-aware** — prefers meals that use what's already on hand.
-- **Learns over time** — `❤ Loved` and `Too hard` buttons update preferences so future weeks weight meals in or out.
-- **One-tap swap** — replace any single day without regenerating the whole week.
+- **Learns over time** — rate each meal (loved / ok / too-complicated / don't repeat) and leave free-text notes. The planner reads recent notes when picking next week's meals.
+- **Single-day swap with reason** — replace one day; the reason you type ("too spicy for the kid", "want something quicker") drives the model's new pick.
 - **Editable recipes** — view + edit full ingredients/steps for both main and side.
 - **Shopping list** — auto-generated, deduped across days, with optional **Send to Todoist** so it syncs to your phone.
 - **Weekly cron** — macOS LaunchAgent auto-generates the new week every Monday at 8am.
@@ -67,8 +67,8 @@ Logs: `logs/cron.out.log` and `logs/cron.err.log`.
 ## Day-to-day
 
 - **Open the app** → see this week's plan and shopping list.
-- **❤ Loved / Too hard** buttons → automatically update `preferences.json` so future weeks weight that meal in or out.
-- **Swap** → asks Claude for a new pick for that day only, respecting time caps and the rest of the week.
+- **Feedback** button on a meal → opens a modal with a rating (loved / ok / too-complicated / don't repeat) and free-text notes. The rating auto-updates `preferences.json`; the notes get passed into the next plan's prompt so Claude can act on things like "kid loved the broccoli" or "took 70 min, not 40".
+- **Swap…** button → opens a small modal asking what should change about that day. Your typed reason is sent verbatim to the model, which replaces just that one day (respecting time caps, the other days' picks, and any prior feedback).
 - **Recipe button** → view + edit the full recipe (ingredients, steps, notes). Edits save into `history.json`.
 - **Pantry / Preferences tabs** → edit what's on hand and family quirks; future plans take these into account.
 - **Send to Todoist** (on the Shopping tab) → pushes "Buy this week" + "Check stock" into a `Groceries` project, with a new section per week. Sync handles the rest — open Todoist on your phone at the store. Requires `TODOIST_API_TOKEN` in `.env` (token at https://app.todoist.com/app/settings/integrations/developer). The project name is configurable via `TODOIST_PROJECT_NAME` (defaults to "Groceries"); it's created on first push if it doesn't exist.
@@ -80,7 +80,7 @@ Logs: `logs/cron.out.log` and `logs/cron.err.log`.
 | GET | `/api/state` | Pantry, history, preferences, currentPlan, weekOf |
 | POST | `/api/plan/generate` | Generate this week's plan (body: `{ instruction? }`) |
 | POST | `/api/plan/swap` | Swap one day (body: `{ day, reason? }`) |
-| POST | `/api/plan/feedback` | Record feedback (body: `{ day, feedback }`) |
+| POST | `/api/plan/feedback` | Record feedback (body: `{ day, rating?, notes? }` — at least one of `rating` or `notes` required) |
 | PUT | `/api/plan/recipe` | Save an edited recipe (body: `{ day, meal }`) |
 | POST | `/api/shopping/push-to-todoist` | Push current shopping list to Todoist as a new section under `TODOIST_PROJECT_NAME` |
 | GET/PUT | `/api/pantry` | Read/replace pantry items |
