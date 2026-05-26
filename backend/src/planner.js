@@ -110,10 +110,13 @@ export async function generatePlan({ pantry, history, preferences, weekOf, instr
   const anthropic = getClient();
   const res = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 4096,
+    max_tokens: 8192,
     system: buildSystemPrompt(),
     messages: [{ role: "user", content: buildUserPrompt({ pantry, history, preferences, weekOf, instruction }) }],
   });
+  if (res.stop_reason === "max_tokens") {
+    throw new Error("Plan output was truncated before completion. Try again, or reduce free-text in pantry/preferences/feedback notes.");
+  }
   const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
   return extractJson(text);
 }
@@ -155,10 +158,13 @@ Recent meals + feedback (learn from notes):
 ${JSON.stringify(recent)}`;
   const res = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 1500,
+    max_tokens: 2048,
     system: sys,
     messages: [{ role: "user", content: user }],
   });
+  if (res.stop_reason === "max_tokens") {
+    throw new Error("Swap output was truncated before completion. Try a shorter swap reason and try again.");
+  }
   const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
   return extractJson(text);
 }
