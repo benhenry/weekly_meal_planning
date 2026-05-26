@@ -12,6 +12,7 @@ Weekly meal planner that asks Claude to design a full week of dinners — main +
 - **Editable recipes** — view + edit full ingredients/steps for both main and side.
 - **Shopping list** — auto-generated, deduped across days, with optional **Send to Todoist** so it syncs to your phone.
 - **Weekly cron** — macOS LaunchAgent auto-generates the new week every Monday at 8am.
+- **Week history** — every generated week is kept. Use the picker in the header to flip between past weeks; their meals, recipes, and shopping lists are preserved. Past weeks are read-only for plan changes but you can still leave feedback/notes (useful for recording how a meal actually went).
 
 ## Architecture
 
@@ -79,10 +80,10 @@ Logs: `logs/cron.out.log` and `logs/cron.err.log`.
 |---|---|---|
 | GET | `/api/state` | Pantry, history, preferences, currentPlan, weekOf |
 | POST | `/api/plan/generate` | Generate this week's plan (body: `{ instruction? }`) |
-| POST | `/api/plan/swap` | Swap one day (body: `{ day, reason? }`) |
-| POST | `/api/plan/feedback` | Record feedback (body: `{ day, rating?, notes? }` — at least one of `rating` or `notes` required) |
-| PUT | `/api/plan/recipe` | Save an edited recipe (body: `{ day, meal }`) |
-| POST | `/api/shopping/push-to-todoist` | Push current shopping list to Todoist as a new section under `TODOIST_PROJECT_NAME` |
+| POST | `/api/plan/swap` | Swap one day on the current week (body: `{ day, reason?, weekOf? }`; weekOf defaults to latest but must equal the calendar's current week) |
+| POST | `/api/plan/feedback` | Record feedback for any week (body: `{ day, rating?, notes?, weekOf? }` — at least one of `rating` or `notes` required; weekOf defaults to latest) |
+| PUT | `/api/plan/recipe` | Save an edited recipe (body: `{ day, meal, weekOf? }`; weekOf defaults to latest) |
+| POST | `/api/shopping/push-to-todoist` | Push the selected week's shopping list to Todoist as a new section under `TODOIST_PROJECT_NAME` (body: `{ weekOf? }`; defaults to latest) |
 | GET/PUT | `/api/pantry` | Read/replace pantry items |
 | GET/PUT | `/api/preferences` | Read/replace likes, dislikes, notes |
 

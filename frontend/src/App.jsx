@@ -7,6 +7,7 @@ import PreferencesEditor from "./components/PreferencesEditor.jsx";
 import RecipeEditor from "./components/RecipeEditor.jsx";
 import FeedbackModal from "./components/FeedbackModal.jsx";
 import SwapModal from "./components/SwapModal.jsx";
+import WeekPicker from "./components/WeekPicker.jsx";
 
 const TABS = [
   { id: "week", label: "This Week" },
@@ -24,6 +25,7 @@ export default function App() {
   const [editing, setEditing] = useState(null);
   const [feedbackFor, setFeedbackFor] = useState(null);
   const [swapFor, setSwapFor] = useState(null);
+  const [selectedWeekOf, setSelectedWeekOf] = useState(null);
 
   const flash = (msg) => {
     setToast(msg);
@@ -35,12 +37,23 @@ export default function App() {
       const s = await api.state();
       setState(s);
       setError(null);
+      // Default to the latest week if nothing is selected yet.
+      if (selectedWeekOf == null) {
+        setSelectedWeekOf(s.currentPlan?.weekOf || null);
+      }
     } catch (e) {
       setError(e.message);
     }
   };
 
   useEffect(() => { refresh(); }, []);
+
+  const weeks = state?.history?.weeks || [];
+  const selectedPlan = selectedWeekOf
+    ? weeks.find((w) => w.weekOf === selectedWeekOf) || state?.currentPlan
+    : state?.currentPlan;
+  const calendarWeekOf = state?.weekOf;
+  const isViewingCurrent = selectedPlan?.weekOf === calendarWeekOf;
 
   const wrap = async (label, fn) => {
     setBusy(true);
@@ -55,26 +68,35 @@ export default function App() {
     }
   };
 
+  // Merge an updated plan (returned from any endpoint) back into history.weeks by weekOf.
+  const mergePlan = (s, plan) => {
+    const rest = (s.history.weeks || []).filter((w) => w.weekOf !== plan.weekOf);
+    const next = [...rest, plan].sort((a, b) => a.weekOf.localeCompare(b.weekOf));
+    const isLatest = next[next.length - 1].weekOf === plan.weekOf;
+    return { ...s, history: { weeks: next }, currentPlan: isLatest ? plan : s.currentPlan };
+  };
+
   const handleGenerate = (instruction) => wrap("Plan saved", async () => {
     const { plan } = await api.generate(instruction);
-    setState((s) => ({ ...s, currentPlan: plan, history: { weeks: [...(s.history.weeks || []).filter((w) => w.weekOf !== plan.weekOf), plan] } }));
+    setState((s) => mergePlan(s, plan));
+    setSelectedWeekOf(plan.weekOf);
   });
 
   const handleSwap = (day, reason) => wrap(`Swapped ${day}`, async () => {
-    const { plan } = await api.swap(day, reason);
-    setState((s) => ({ ...s, currentPlan: plan }));
+    const { plan } = await api.swap(day, reason, selectedPlan?.weekOf);
+    setState((s) => mergePlan(s, plan));
     setSwapFor(null);
   });
 
   const handleFeedback = (day, payload) => wrap("Feedback saved", async () => {
-    const { plan } = await api.feedback(day, payload);
-    setState((s) => ({ ...s, currentPlan: plan }));
+    const { plan } = await api.feedback(day, payload, selectedPlan?.weekOf);
+    setState((s) => mergePlan(s, plan));
     setFeedbackFor(null);
   });
 
   const handleSaveRecipe = (day, meal) => wrap("Recipe saved", async () => {
-    const { plan } = await api.saveRecipe(day, meal);
-    setState((s) => ({ ...s, currentPlan: plan }));
+    const { plan } = await api.saveRecipe(day, meal, selectedPlan?.weekOf);
+    setState((s) => mergePlan(s, plan));
     setEditing(null);
   });
 
@@ -92,7 +114,7 @@ export default function App() {
     setBusy(true);
     setError(null);
     try {
-      const result = await api.pushToTodoist();
+      const result = await api.pushToTodoist(selectedPlan?.weekOf);
       flash(`Sent ${result.tasksCreated} items to Todoist · ${result.section.name}`);
     } catch (e) {
       setError(e.message);
@@ -110,10 +132,25 @@ export default function App() {
       <header>
         <div>
           <h1>🍽 Family Dinners</h1>
-          <div className="sub">Week of {state.currentPlan?.weekOf || state.weekOf}</div>
+          {weeks.length > 0 ? (
+            <WeekPicker
+              weeks={weeks}
+              selectedWeekOf={selectedWeekOf}
+              currentWeekOf={calendarWeekOf}
+              onSelect={setSelectedWeekOf}
+            />
+          ) : (
+            <div className="sub">No plans yet — generate the first one →</div>
+          )}
         </div>
         <button className="primary" disabled={busy} onClick={() => handleGenerate()}>
-          {busy ? "Working…" : state.currentPlan ? "Regenerate plan" : "Generate this week"}
+          {busy
+            ? "Working…"
+            : !weeks.length
+              ? "Generate this week"
+              : isViewingCurrent
+                ? "Regenerate this week"
+                : "Generate current week"}
         </button>
       </header>
 
@@ -130,8 +167,9 @@ export default function App() {
 
         {tab === "week" && (
           <WeekView
-            plan={state.currentPlan}
+            plan={selectedPlan}
             busy={busy}
+            readOnlySwap={!isViewingCurrent}
             onSwap={(day) => setSwapFor(day)}
             onFeedback={(day) => setFeedbackFor(day)}
             onEditRecipe={(day) => setEditing(day)}
@@ -139,35 +177,35 @@ export default function App() {
           />
         )}
         {tab === "shopping" && (
-          <ShoppingList plan={state.currentPlan} busy={busy} onPushToTodoist={handlePushToTodoist} />
+          <ShoppingList plan={selectedPlan} busy={busy} onPushToTodoist={handlePushToTodoist} />
         )}
         {tab === "pantry" && <PantryEditor items={state.pantry.items || []} onSave={handleSavePantry} />}
         {tab === "prefs" && <PreferencesEditor prefs={state.preferences} onSave={handleSavePreferences} />}
       </main>
 
-      {editing && state.currentPlan?.meals?.[editing] && (
+      {editing && selectedPlan?.meals?.[editing] && (
         <RecipeEditor
           day={editing}
-          meal={state.currentPlan.meals[editing]}
+          meal={selectedPlan.meals[editing]}
           onClose={() => setEditing(null)}
           onSave={(meal) => handleSaveRecipe(editing, meal)}
         />
       )}
 
-      {feedbackFor && state.currentPlan?.meals?.[feedbackFor] && (
+      {feedbackFor && selectedPlan?.meals?.[feedbackFor] && (
         <FeedbackModal
           day={feedbackFor}
-          meal={state.currentPlan.meals[feedbackFor]}
-          existing={state.currentPlan.feedback?.[feedbackFor]}
+          meal={selectedPlan.meals[feedbackFor]}
+          existing={selectedPlan.feedback?.[feedbackFor]}
           onClose={() => setFeedbackFor(null)}
           onSave={(payload) => handleFeedback(feedbackFor, payload)}
         />
       )}
 
-      {swapFor && state.currentPlan?.meals?.[swapFor] && (
+      {swapFor && selectedPlan?.meals?.[swapFor] && isViewingCurrent && (
         <SwapModal
           day={swapFor}
-          meal={state.currentPlan.meals[swapFor]}
+          meal={selectedPlan.meals[swapFor]}
           onClose={() => setSwapFor(null)}
           onSwap={(reason) => handleSwap(swapFor, reason)}
         />

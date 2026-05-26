@@ -15,6 +15,9 @@ body { margin: 0; background: var(--bg); color: var(--ink); }
 header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
 header h1 { margin: 0; font-size: 22px; }
 header .sub { color: var(--muted); font-size: 13px; }
+.week-picker { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.week-picker select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font: inherit; background: white; cursor: pointer; }
+.week-picker button { line-height: 1; }
 .tabs { display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--card); }
 .tabs button { background: transparent; border: 0; padding: 12px 14px; font: inherit; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
 .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }

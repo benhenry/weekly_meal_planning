@@ -39,38 +39,52 @@ app.post("/api/plan/generate", async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Find the target week in history. If weekOf is omitted, defaults to the latest.
+// Returns { plan, weeks } or null when no match exists.
+function findWeek(history, weekOf) {
+  const weeks = history.weeks || [];
+  if (!weeks.length) return null;
+  if (!weekOf) return { plan: weeks[weeks.length - 1], weeks };
+  const plan = weeks.find((w) => w.weekOf === weekOf);
+  return plan ? { plan, weeks } : null;
+}
+
 app.post("/api/plan/swap", async (req, res, next) => {
   try {
-    const { day, reason } = req.body || {};
+    const { day, reason, weekOf } = req.body || {};
     if (!day) return res.status(400).json({ error: "day is required" });
     const { pantry, history, preferences } = await storage.getAll();
-    const weeks = history.weeks || [];
-    if (!weeks.length) return res.status(400).json({ error: "no current plan" });
-    const currentPlan = weeks[weeks.length - 1];
+    const target = findWeek(history, weekOf);
+    if (!target) return res.status(400).json({ error: "no plan found for that week" });
+
+    const today = currentWeekOf();
+    if (target.plan.weekOf !== today) {
+      return res.status(400).json({ error: "swap is only allowed on the current week" });
+    }
+
     const newMeal = await swapMeal({
       pantry, history, preferences,
-      weekOf: currentPlan.weekOf, day, currentPlan, reason,
+      weekOf: target.plan.weekOf, day, currentPlan: target.plan, reason,
     });
-    currentPlan.meals[day] = newMeal;
-    await storage.setHistory({ weeks });
-    res.json({ plan: currentPlan });
+    target.plan.meals[day] = newMeal;
+    await storage.setHistory({ weeks: target.weeks });
+    res.json({ plan: target.plan });
   } catch (e) { next(e); }
 });
 
 app.post("/api/plan/feedback", async (req, res, next) => {
   try {
-    const { day, rating, notes } = req.body || {};
+    const { day, rating, notes, weekOf } = req.body || {};
     if (!day) return res.status(400).json({ error: "day required" });
-    if (rating == null && (notes == null || notes === "")) {
+    if (rating === undefined && (notes === undefined || notes === "")) {
       return res.status(400).json({ error: "rating or notes required" });
     }
     const history = await storage.getHistory();
-    const weeks = history.weeks || [];
-    if (!weeks.length) return res.status(400).json({ error: "no current plan" });
-    const current = weeks[weeks.length - 1];
+    const target = findWeek(history, weekOf);
+    if (!target) return res.status(400).json({ error: "no plan found for that week" });
+    const current = target.plan;
     current.feedback = current.feedback || {};
 
-    // Merge with any prior feedback for this day (so adding notes later doesn't erase rating).
     const prior = current.feedback[day];
     const priorObj = typeof prior === "string" ? { rating: prior, notes: "" } : (prior || { rating: null, notes: "" });
     current.feedback[day] = {
@@ -89,33 +103,32 @@ app.post("/api/plan/feedback", async (req, res, next) => {
       }
       await storage.setPreferences({ ...prefs, liked: [...liked], disliked: [...disliked] });
     }
-    await storage.setHistory({ weeks });
+    await storage.setHistory({ weeks: target.weeks });
     res.json({ plan: current });
   } catch (e) { next(e); }
 });
 
 app.put("/api/plan/recipe", async (req, res, next) => {
   try {
-    const { day, meal } = req.body || {};
+    const { day, meal, weekOf } = req.body || {};
     if (!day || !meal) return res.status(400).json({ error: "day and meal required" });
     const history = await storage.getHistory();
-    const weeks = history.weeks || [];
-    if (!weeks.length) return res.status(400).json({ error: "no current plan" });
-    const current = weeks[weeks.length - 1];
-    current.meals[day] = { ...current.meals[day], ...meal };
-    await storage.setHistory({ weeks });
-    res.json({ plan: current });
+    const target = findWeek(history, weekOf);
+    if (!target) return res.status(400).json({ error: "no plan found for that week" });
+    target.plan.meals[day] = { ...target.plan.meals[day], ...meal };
+    await storage.setHistory({ weeks: target.weeks });
+    res.json({ plan: target.plan });
   } catch (e) { next(e); }
 });
 
-app.post("/api/shopping/push-to-todoist", async (_req, res, next) => {
+app.post("/api/shopping/push-to-todoist", async (req, res, next) => {
   try {
+    const { weekOf } = req.body || {};
     const history = await storage.getHistory();
-    const weeks = history.weeks || [];
-    if (!weeks.length) return res.status(400).json({ error: "no current plan" });
-    const current = weeks[weeks.length - 1];
-    if (!current.shopping) return res.status(400).json({ error: "current plan has no shopping list" });
-    const result = await pushShoppingList({ shopping: current.shopping, weekOf: current.weekOf });
+    const target = findWeek(history, weekOf);
+    if (!target) return res.status(400).json({ error: "no plan found for that week" });
+    if (!target.plan.shopping) return res.status(400).json({ error: "plan has no shopping list" });
+    const result = await pushShoppingList({ shopping: target.plan.shopping, weekOf: target.plan.weekOf });
     res.json(result);
   } catch (e) { next(e); }
 });

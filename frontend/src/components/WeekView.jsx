@@ -16,7 +16,7 @@ function normalize(fb) {
   return { rating: fb.rating || null, notes: fb.notes || "" };
 }
 
-export default function WeekView({ plan, busy, onSwap, onFeedback, onEditRecipe, onGenerate }) {
+export default function WeekView({ plan, busy, readOnlySwap, onSwap, onFeedback, onEditRecipe, onGenerate }) {
   const [instruction, setInstruction] = useState("");
 
   if (!plan) {
@@ -83,7 +83,7 @@ export default function WeekView({ plan, busy, onSwap, onFeedback, onEditRecipe,
                 <button className="ghost small" disabled={busy} onClick={() => onFeedback(day)}>
                   {feedback?.rating || feedback?.notes ? "Edit feedback" : "Feedback"}
                 </button>
-                {day !== "Fri" && (
+                {day !== "Fri" && !readOnlySwap && (
                   <button className="ghost small" disabled={busy} onClick={() => onSwap(day)}>Swap…</button>
                 )}
               </div>
@@ -92,20 +92,26 @@ export default function WeekView({ plan, busy, onSwap, onFeedback, onEditRecipe,
         })}
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <h2>Tweak this week</h2>
-        <div className="row">
-          <input
-            type="text"
-            placeholder="e.g. simpler this week, no fish, more pasta"
-            value={instruction}
-            onChange={(e) => setInstruction(e.target.value)}
-          />
-          <button className="primary" disabled={busy} onClick={() => onGenerate(instruction)}>
-            Regenerate with note
-          </button>
+      {readOnlySwap ? (
+        <div className="card" style={{ marginTop: 20, color: "var(--muted)" }}>
+          You're viewing a past week. Feedback and recipe notes can still be edited, but the meals and shopping list are frozen. Use the picker above to jump back to the current week.
         </div>
-      </div>
+      ) : (
+        <div className="card" style={{ marginTop: 20 }}>
+          <h2>Tweak this week</h2>
+          <div className="row">
+            <input
+              type="text"
+              placeholder="e.g. simpler this week, no fish, more pasta"
+              value={instruction}
+              onChange={(e) => setInstruction(e.target.value)}
+            />
+            <button className="primary" disabled={busy} onClick={() => onGenerate(instruction)}>
+              Regenerate with note
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -15,10 +15,10 @@ async function req(path, opts = {}) {
 export const api = {
   state: () => req("/state"),
   generate: (instruction) => req("/plan/generate", { method: "POST", body: JSON.stringify({ instruction }) }),
-  swap: (day, reason) => req("/plan/swap", { method: "POST", body: JSON.stringify({ day, reason }) }),
-  feedback: (day, { rating, notes }) => req("/plan/feedback", { method: "POST", body: JSON.stringify({ day, rating, notes }) }),
-  saveRecipe: (day, meal) => req("/plan/recipe", { method: "PUT", body: JSON.stringify({ day, meal }) }),
+  swap: (day, reason, weekOf) => req("/plan/swap", { method: "POST", body: JSON.stringify({ day, reason, weekOf }) }),
+  feedback: (day, { rating, notes }, weekOf) => req("/plan/feedback", { method: "POST", body: JSON.stringify({ day, rating, notes, weekOf }) }),
+  saveRecipe: (day, meal, weekOf) => req("/plan/recipe", { method: "PUT", body: JSON.stringify({ day, meal, weekOf }) }),
   savePantry: (items) => req("/pantry", { method: "PUT", body: JSON.stringify({ items }) }),
   savePreferences: (prefs) => req("/preferences", { method: "PUT", body: JSON.stringify(prefs) }),
-  pushToTodoist: () => req("/shopping/push-to-todoist", { method: "POST" }),
+  pushToTodoist: (weekOf) => req("/shopping/push-to-todoist", { method: "POST", body: JSON.stringify({ weekOf }) }),
 };
